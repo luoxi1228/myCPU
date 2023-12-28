@@ -14,6 +14,8 @@ module mycpu_top(
     output [31:0] data_sram_addr ,
     output [31:0] data_sram_wdata,
     input  [31:0] data_sram_rdata
+    //debug
+    
 );
 
 // 一个例子
