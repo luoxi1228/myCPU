@@ -21,7 +21,6 @@
 
 
 module alu(
-	
 	input wire[31:0] a,b,
 	input wire[2:0] op,
 	output reg[31:0] y,
