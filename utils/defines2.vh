@@ -29,7 +29,7 @@
 `define AHB_WAIT_FOR_STALL 2'b11
 
 //specific inst macro definition
-
+//逻辑指令
 `define NOP			6'b000000
 `define AND 		6'b100100
 `define OR 			6'b100101
@@ -39,35 +39,35 @@
 `define ORI			6'b001101
 `define XORI		6'b001110
 `define LUI			6'b001111
-
+//移位指令
 `define SLL			6'b000000
 `define SLLV		6'b000100
 `define SRL 		6'b000010
 `define SRLV 		6'b000110
 `define SRA 		6'b000011
 `define SRAV 		6'b000111
-
+//数据移动指令
 `define MFHI  		6'b010000
 `define MTHI  		6'b010001  
 `define MFLO  		6'b010010
 `define MTLO  		6'b010011
-
-`define SLT  6'b101010
-`define SLTU  6'b101011
-`define SLTI  6'b001010
-`define SLTIU  6'b001011   
+  
+//算术指令
 `define ADD  6'b100000
 `define ADDU  6'b100001
 `define SUB  6'b100010
 `define SUBU  6'b100011
+`define SLT  6'b101010
+`define SLTU  6'b101011
+`define SLTI  6'b001010
+`define SLTIU  6'b001011 
 `define ADDI  6'b001000
 `define ADDIU  6'b001001
-
 `define MULT  6'b011000
 `define MULTU  6'b011001
 `define DIV  6'b011010
 `define DIVU  6'b011011
-
+//跳转指令
 `define J  6'b000010
 `define JAL  6'b000011
 `define JALR  6'b001001
@@ -80,7 +80,7 @@
 `define BLTZ  5'b00000
 `define BLTZAL  5'b10000
 `define BNE  6'b000101
-
+//访存指令
 `define LB  6'b100000
 `define LBU  6'b100100
 `define LH  6'b100001
@@ -89,10 +89,10 @@
 `define SB  6'b101000
 `define SH  6'b101001
 `define SW  6'b101011
-
+//内陷指令
 `define SYSCALL 6'b001100
 `define BREAK 6'b001101
-   
+//
 `define ERET 5'b10000
 
 `define R_TYPE 6'b000000
