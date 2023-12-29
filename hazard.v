@@ -25,7 +25,7 @@ module hazard(
 	output wire stallF,
 	//decode stage
 	input wire[4:0] rsD,rtD,
-	input wire branchD,
+	input wire branchD,jrD,
 	output wire forwardaD,forwardbD,
 	output wire stallD,
 	//execute stage
@@ -47,11 +47,11 @@ module hazard(
 
 	wire lwstallD,branchstallD;
 
-	//forwarding sources to D stage (branch equality)
+	//forwarding sources to D stage (branch equality) 流水线暂停
 	assign forwardaD = (rsD != 0 & rsD == writeregM & regwriteM);
 	assign forwardbD = (rtD != 0 & rtD == writeregM & regwriteM);
 	
-	//forwarding sources to E stage (ALU)
+	//forwarding sources to E stage (ALU)数据前推
 
 	always @(*) begin
 		forwardaE = 2'b00;
@@ -78,9 +78,9 @@ module hazard(
 		end
 	end
 
-	//stalls
+	//stalls流水线暂停
 	assign #1 lwstallD = memtoregE & (rtE == rsD | rtE == rtD);
-	assign #1 branchstallD = branchD &
+	assign #1 branchstallD = (branchD|jrD) &
 				(regwriteE & 
 				(writeregE == rsD | writeregE == rtD) |
 				memtoregM &

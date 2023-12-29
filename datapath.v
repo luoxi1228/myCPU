@@ -30,6 +30,7 @@ module datapath(
 	input wire jumpD,
 	output wire equalD,
 	output wire[5:0] opD,functD,
+	output wire[4:0] rtD_control,//提供给controller模块
 	//execute stage
 	input wire memtoregE,
 	input wire alusrcE,regdstE,
@@ -49,14 +50,14 @@ module datapath(
 	//fetch stage
 	wire stallF;
 	//FD
-	wire [31:0] pcnextFD,pcnextbrFD,pcplus4F,pcbranchD;
+	wire [31:0] pcnextFD,pcnextbrFD,pcplus4F,pcbranchD,pcnextjrD;
 	//decode stage
 	wire [31:0] pcplus4D,instrD;
 	wire forwardaD,forwardbD;
 	wire [4:0] rsD,rtD,rdD;
 	wire flushD,stallD; 
 	wire [31:0] signimmD,signimmshD;
-	wire [31:0] srcaD,srca2D,srcbD,srcb2D;
+	wire [31:0] srcaD,srca2D,srcbD,srcb2D,rdata1;
 	//execute stage
 	wire [1:0] forwardaE,forwardbE;
 	wire [4:0] rsE,rtE,rdE;
@@ -77,6 +78,7 @@ module datapath(
 		//decode stage
 		rsD,rtD,
 		branchD,
+		jrD,
 		forwardaD,forwardbD,
 		stallD,
 		//execute stage
@@ -95,18 +97,23 @@ module datapath(
 		regwriteW
 		);
 
-	//next PC logic (operates in fetch an decode)
+	//------next PC logic (operates in fetch an decode)对写入指令存储器的地址进行选择-------
+	//根据pcsrcD=1:branch, 0:pc+4
 	mux2 #(32) pcbrmux(pcplus4F,pcbranchD,pcsrcD,pcnextbrFD);
+	//jumpD=1:j, 0:pcnextbrFD
 	mux2 #(32) pcmux(pcnextbrFD,
 		{pcplus4D[31:28],instrD[25:0],2'b00},
 		jumpD,pcnextFD);
+	//jrD=1:地址为rdata1, 0:地址为pcnextFD
+	mux2 #(32) pc_jr_mux(pcnextFD,rdata1,jrD,pcnextjrD);//jr和j指令选择
 
 	//regfile (operates in decode and writeback)
-	regfile rf(clk,regwriteW,rsD,rtD,writeregW,resultW,srcaD,srcbD);
+	regfile rf(clk,regwriteW,rsD,rtD,writeregW,resultW,srcaD,srcbD,rdata1);
 
 	//fetch stage logic
-	pc #(32) pcreg(clk,rst,~stallF,pcnextFD,pcF);
+	pc #(32) pcreg(clk,rst,~stallF,pcnextjrD,pcF);
 	adder pcadd1(pcF,32'b100,pcplus4F);
+
 	//decode stage
 	flopenr #(32) r1D(clk,rst,~stallD,pcplus4F,pcplus4D);
 	flopenrc #(32) r2D(clk,rst,~stallD,flushD,instrF,instrD);
@@ -122,6 +129,7 @@ module datapath(
 	assign rsD = instrD[25:21];
 	assign rtD = instrD[20:16];
 	assign rdD = instrD[15:11];
+	assign rtD_control=rtD;//将rtD的值赋值给rtD_control输出
 
 	//execute stage
 	floprc #(32) r1E(clk,rst,flushE,srcaD,srcaE);

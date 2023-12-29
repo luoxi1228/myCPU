@@ -34,11 +34,13 @@ module mips(
 			regwriteE,regwriteM,regwriteW;
 	wire [2:0] alucontrolE;
 	wire flushE,equalD;
+	wire [4:0] rtD;//controller模块需要的rtD
 
 	controller c(
 		clk,rst,
 		//decode stage
 		opD,functD,
+		rtD,
 		pcsrcD,branchD,equalD,jumpD,
 		
 		//execute stage
@@ -62,7 +64,7 @@ module mips(
 		pcsrcD,branchD,
 		jumpD,
 		equalD,
-		opD,functD,
+		opD,functD,rtD,
 		//execute stage
 		memtoregE,
 		alusrcE,regdstE,
