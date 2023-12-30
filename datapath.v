@@ -33,9 +33,11 @@ module datapath(
 	output wire[4:0] rtD_control,//提供给controller模块
 	//execute stage
 	input wire memtoregE,
-	input wire alusrcE,regdstE,
+	input wire alusrcE,
+	input wire [1:0]regdstE,
 	input wire regwriteE,
 	input wire[2:0] alucontrolE,
+	input wire jalE,
 	output wire flushE,
 	//mem stage
 	input wire memtoregM,
@@ -57,7 +59,7 @@ module datapath(
 	wire [4:0] rsD,rtD,rdD;
 	wire flushD,stallD; 
 	wire [31:0] signimmD,signimmshD;
-	wire [31:0] srcaD,srca2D,srcbD,srcb2D,rdata1;
+	wire [31:0] srcaD,srca2D,srcbD,srcb2D;
 	//execute stage
 	wire [1:0] forwardaE,forwardbE;
 	wire [4:0] rsE,rtE,rdE;
@@ -65,6 +67,7 @@ module datapath(
 	wire [31:0] signimmE;
 	wire [31:0] srcaE,srca2E,srcbE,srcb2E,srcb3E;
 	wire [31:0] aluoutE;
+
 	//mem stage
 	wire [4:0] writeregM;
 	//writeback stage
@@ -104,11 +107,11 @@ module datapath(
 	mux2 #(32) pcmux(pcnextbrFD,
 		{pcplus4D[31:28],instrD[25:0],2'b00},
 		jumpD,pcnextFD);
-	//jrD=1:地址为rdata1, 0:地址为pcnextFD
-	mux2 #(32) pc_jr_mux(pcnextFD,rdata1,jrD,pcnextjrD);//jr和j指令选择
+	//jrD=1:地址为srca2D, 0:地址为pcnextFD
+	mux2 #(32) pc_jr_mux(pcnextFD,srca2D,jrD,pcnextjrD);//jr和j指令选择
 
 	//regfile (operates in decode and writeback)
-	regfile rf(clk,regwriteW,rsD,rtD,writeregW,resultW,srcaD,srcbD,rdata1);
+	regfile rf(clk,regwriteW,rsD,rtD,writeregW,resultW,srcaD,srcbD);
 
 	//fetch stage logic
 	pc #(32) pcreg(clk,rst,~stallF,pcnextjrD,pcF);
@@ -117,6 +120,7 @@ module datapath(
 	//decode stage
 	flopenr #(32) r1D(clk,rst,~stallD,pcplus4F,pcplus4D);
 	flopenrc #(32) r2D(clk,rst,~stallD,flushD,instrF,instrD);
+	flopenrc #(32) r5D(clk,rst,~stallD,flushD,pcF,pcD);
 	signext se(instrD[15:0],signimmD);
 	sl2 immsh(signimmD,signimmshD);
 	adder pcadd2(pcplus4D,signimmshD,pcbranchD);
@@ -138,12 +142,19 @@ module datapath(
 	floprc #(5) r4E(clk,rst,flushE,rsD,rsE);
 	floprc #(5) r5E(clk,rst,flushE,rtD,rtE);
 	floprc #(5) r6E(clk,rst,flushE,rdD,rdE);
+	flopenrc #(32) r11E(clk,rst,~stallE,flushE,pcD,pcE);
 
 	mux3 #(32) forwardaemux(srcaE,resultW,aluoutM,forwardaE,srca2E);
 	mux3 #(32) forwardbemux(srcbE,resultW,aluoutM,forwardbE,srcb2E);
 	mux2 #(32) srcbmux(srcb2E,signimmE,alusrcE,srcb3E);
-	alu alu(srca2E,srcb3E,alucontrolE,aluoutE);
-	mux2 #(5) wrmux(rtE,rdE,regdstE,writeregE);
+
+	//跳转链接类指令,复用ALU,ALU源操作数选择分别为pcE and 8
+	mux2 #(32) alusrcamux(srca2E,pcE,jalE,srca3E);
+	mux2 #(32) alusrcbmux(srcb3E,32'h00000008,jalE,srcb4E);
+
+	alu alu(srca3E,srcb4E,alucontrolE,aluoutE);
+	//写回哪个寄存器jal指令写回31号寄存器
+	mux3 #(5) wrmux(rtE,rdE,5'd31,regdstE,writeregE);
 
 	//mem stage
 	flopr #(32) r1M(clk,rst,srcb2E,writedataM);

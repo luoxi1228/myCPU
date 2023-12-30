@@ -82,7 +82,7 @@ module aludec(
 					`BGEZAL, `BLTZAL:	alucontrol = `ADDU_CONTROL; //做加法
 					default:    alucontrol = `USELESS_CONTROL;
 				endcase	
-			`JAL : alucontrol = `ADDU_CONTROL; //做加法
+			`JAL : alucontrol = `ADDU_CONTROL; //做加法pc+8
 			//for exception
 			// `SPECIAL3_INST:
 			// 	case(rs)
