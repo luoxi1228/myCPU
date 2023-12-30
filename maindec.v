@@ -22,6 +22,7 @@
 
 module maindec(
 	input wire[5:0] op,
+	input wire[5:0] funct,
 	input wire[4:0] rt,
 	output wire memtoreg,memwrite,
 	output wire branch,alusrc,

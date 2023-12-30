@@ -18,13 +18,13 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
-`include"defines2.vh"
+`include "defines2.vh"
 
 module eqcmp(
 	input wire [31:0] a,b,
 	input wire [5:0]op,
 	input wire [4:0]rt,
-	output wire y
+	output reg y
     );
 	always@(*) begin
 		case(op)

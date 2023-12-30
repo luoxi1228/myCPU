@@ -36,15 +36,15 @@ module mips(
 	wire [4:0] alucontrolE;
 	wire flushE,equalD;
 	wire [4:0] rtD;//controller模块需要的rtD
-	wire jumpD,jalE,branchD;
+	wire jumpD,jalE,branchD,jrD;
 
-controller(
+controller con(
 	clk,rst,
 	//decode stage
 	opD,functD,
 	rtD,
 	equalD,
-	pcsrcD,branchD,jumpD,
+	pcsrcD,branchD,jumpD,jrD,
 	
 	//execute stage
 	flushE,
@@ -63,14 +63,14 @@ controller(
     );
 
 
-datapath(
+datapath  dat(
 	clk,rst,
 	//fetch stage
 	pcF,
 	instrF,
 	//decode stage
 	pcsrcD,branchD,
-	jumpD,
+	jumpD,jrD,
 	equalD,
 	opD,functD,
 	rtD,//提供给controller模块

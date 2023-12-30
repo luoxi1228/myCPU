@@ -1,4 +1,5 @@
 `timescale 1ns / 1ps
+`include "defines2.vh"
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer: 
@@ -18,7 +19,6 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
-`include"defines2.vh"
 
 module aludec(
 	input wire[5:0] funct,
@@ -29,7 +29,7 @@ module aludec(
     );
 	always @(*) begin
 		case (op)
-			`R_TYPE:
+			`NOP:
 				case (funct)
 					//算术运算
 					`ADD:		alucontrol = `ADD_CONTROL;

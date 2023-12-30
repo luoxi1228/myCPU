@@ -27,7 +27,7 @@ module datapath(
 	input wire[31:0] instrF,
 	//decode stage
 	input wire pcsrcD,branchD,
-	input wire jumpD,
+	input wire jumpD,jrD,
 	output wire equalD,
 	output wire[5:0] opD,functD,
 	output wire[4:0] rtD_control,//提供给controller模块
@@ -126,7 +126,7 @@ module datapath(
 	adder pcadd2(pcplus4D,signimmshD,pcbranchD);
 	mux2 #(32) forwardamux(srcaD,aluoutM,forwardaD,srca2D);
 	mux2 #(32) forwardbmux(srcbD,aluoutM,forwardbD,srcb2D);
-	eqcmp comp(srca2D,srcb2D,equalD);
+	eqcmp comp(srca2D,srcb2D,opD,rtD,equalD);
 
 	assign opD = instrD[31:26];
 	assign functD = instrD[5:0];
